@@ -20,11 +20,30 @@ jobs:
           username: ${{ secrets.PROD_EC2_SSH_USERNAME }}
           key: ${{ secrets.PROD_EC2_SSH_PRIVATE_KEY }}
           script: |
+            # Ensure directory exists
             mkdir -p /home/ubuntu/qbit-ops
-            cd /home/ubuntu/qbit-ops
-            git pull origin main
             
-            cat > /home/ubuntu/qbit-ops/.env << EOF
+            # Check if repository exists and is a git repo, otherwise clone it
+            if [ -d /home/ubuntu/qbit-ops/.git ]; then
+              echo "Repository exists, pulling latest changes..."
+              cd /home/ubuntu/qbit-ops
+              git fetch origin
+              git reset --hard origin/main
+            else
+              echo "Repository not found, cloning..."
+              cd /home/ubuntu
+              # Remove directory if it exists but is not a git repo
+              rm -rf qbit-ops
+              # Clone the repository
+              git clone https://github.com/${{ github.repository }}.git qbit-ops
+              cd /home/ubuntu/qbit-ops
+              git checkout main
+            fi
+            
+            # Ensure we're in the project directory
+            cd /home/ubuntu/qbit-ops
+            
+            cat > .env << EOF
             MONGO_URI=${{ secrets.CHAT_APP_MONGO_URI }}
             MONGO_OPS_URI=${{ secrets.MONGO_OPS_URI }}
             JWT_SECRET=${{ secrets.CHAT_APP_JWT_SECRET }}
