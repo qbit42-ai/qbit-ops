@@ -61,9 +61,19 @@ check_env() {
     fi
 }
 
+# Check if the required network exists
+check_network() {
+    if ! docker network inspect qbit42-staging_default > /dev/null 2>&1; then
+        echo -e "${RED}Error: Docker network 'qbit42-staging_default' does not exist${NC}"
+        echo -e "${YELLOW}Please create it first with: docker network create qbit42-staging_default${NC}"
+        exit 1
+    fi
+}
+
 # Deploy services (full deployment)
 deploy_services() {
     check_env
+    check_network
     
     echo -e "${YELLOW}🚀 Starting qbit-ops deployment...${NC}"
     
@@ -75,7 +85,7 @@ deploy_services() {
     git pull origin main || echo "Warning: Could not pull latest code"
     
     # Build and start services
-    echo -e "${YELLOW}🏗️  Building Docker images...${NC}"
+    echo -e "${YELLOW}🏗️  Building images...${NC}"
     docker compose -f docker-compose.prod.yml build
     
     # Stop existing containers
@@ -111,6 +121,7 @@ deploy_services() {
 # Start services
 start_services() {
     check_env
+    check_network
     echo -e "${YELLOW}🚀 Starting qbit-ops services...${NC}"
     
     # Build images if needed
@@ -166,6 +177,7 @@ show_status() {
 # Build images
 build_images() {
     check_env
+    check_network
     echo -e "${YELLOW}🏗️  Building Docker images...${NC}"
     docker compose -f docker-compose.prod.yml build
     echo -e "${GREEN}✅ Build complete${NC}"
