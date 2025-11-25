@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_EC2_PUBLIC_IP }}
+          username: ${{ secrets.PROD_EC2_SSH_USERNAME }}
+          key: ${{ secrets.PROD_EC2_SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/qbit-ops
+            cd /home/ubuntu/qbit-ops
+            git pull origin main
+            
+            cat > /home/ubuntu/qbit-ops/.env << EOF
+            MONGO_URI=${{ secrets.CHAT_APP_MONGO_URI }}
+            MONGO_OPS_URI=${{ secrets.MONGO_OPS_URI }}
+            JWT_SECRET=${{ secrets.CHAT_APP_JWT_SECRET }}
+            JWT_REFRESH_SECRET=${{ secrets.CHAT_APP_REFRESH_SECRET }}
+            ADMIN_JWT_SECRET=${{ secrets.OPS_APP_JWT_SECRET }}
+            ALLOWED_ORIGINS=https://ops.qbit42.ai,https://chat.qbit42.ai
+            TRUST_PROXY=1
+            SESSION_EXPIRY=900000
+            REFRESH_TOKEN_EXPIRY=604800000
+            COOKIE_DOMAIN=.qbit42.ai
+            NODE_ENV=production
+            PORT=4001
+            QBIT_CHAT_URL=https://chat.qbit42.ai
+            EOF
+            
+            chmod +x scripts/*.sh
+            ./scripts/deploy.sh
