@@ -44,6 +44,16 @@ const Dashboard = () => {
 
           <Card>
             <CardHeader>
+              <CardTitle>Knowledge Base</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">Manage dataspaces, datasets, and interact with Cognee</p>
+              <Button onClick={() => navigate('/knowledgebase')}>Open Knowledge Base</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Statistics</CardTitle>
             </CardHeader>
             <CardContent>

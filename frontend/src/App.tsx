@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
+import KnowledgeBase from './pages/KnowledgeBase';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -33,6 +34,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/knowledgebase"
+            element={
+              <ProtectedRoute>
+                <KnowledgeBase />
               </ProtectedRoute>
             }
           />
